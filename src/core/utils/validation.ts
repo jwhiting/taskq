@@ -1,4 +1,4 @@
-import { ValidationError } from './errors';
+import { ValidationError } from './errors.js';
 
 export function validateQueueName(name: string): void {
   if (!name || typeof name !== 'string') {

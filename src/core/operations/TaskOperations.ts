@@ -1,5 +1,5 @@
 import Database from 'better-sqlite3';
-import { Task, TaskStatus, CreateTaskRequest, UpdateTaskRequest } from '../models/Task';
+import { Task, TaskStatus, CreateTaskRequest, UpdateTaskRequest } from '../models/Task.js';
 import {
   validateQueueName,
   validateTaskTitle,
@@ -7,8 +7,8 @@ import {
   validateTaskStatus,
   validateTaskId,
   validateParameters,
-} from '../utils/validation';
-import { NotFoundError, CheckoutError, DatabaseError, ValidationError } from '../utils/errors';
+} from '../utils/validation.js';
+import { NotFoundError, CheckoutError, DatabaseError, ValidationError } from '../utils/errors.js';
 
 export class TaskOperations {
   constructor(private readonly db: Database.Database) {}

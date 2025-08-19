@@ -1,6 +1,6 @@
 import { Command } from 'commander';
-import { TaskStore } from '../../core/TaskStore';
-import { formatQueueStats, formatJournalTable } from '../utils/formatting';
+import { TaskStore } from '../../core/TaskStore.js';
+import { formatQueueStats, formatJournalTable } from '../utils/formatting.js';
 
 export function registerStatusCommands(program: Command): void {
   program

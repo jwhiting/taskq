@@ -100,7 +100,7 @@ done
 
 # Add npm registry
 echo "Adding npm registry..."
-npm_domains=("registry.npmjs.org" "npm.org" "npmjs.com")
+npm_domains=("registry.npmjs.org" "npm.org" "npmjs.com" "repo.yarnpkg.com")
 for domain in "${npm_domains[@]}"; do
     echo "Resolving $domain..."
     domain_ips=$(dig +short "$domain" A | grep -E '^[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}$' || true)

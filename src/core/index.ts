@@ -1,10 +1,10 @@
-export { TaskStore } from './TaskStore';
-export { TaskQDatabase as Database } from './database/Database';
-export { Configuration, ConfigOptions } from './config/Configuration';
+export { TaskStore } from './TaskStore.js';
+export { TaskQDatabase as Database } from './database/Database.js';
+export { Configuration, ConfigOptions } from './config/Configuration.js';
 
-export { Queue, CreateQueueRequest, UpdateQueueRequest } from './models/Queue';
-export { Task, TaskStatus, CreateTaskRequest, UpdateTaskRequest } from './models/Task';
-export { TaskJournalEntry, CreateTaskJournalRequest } from './models/TaskJournal';
+export { Queue, CreateQueueRequest, UpdateQueueRequest } from './models/Queue.js';
+export { Task, TaskStatus, CreateTaskRequest, UpdateTaskRequest } from './models/Task.js';
+export { TaskJournalEntry, CreateTaskJournalRequest } from './models/TaskJournal.js';
 
 export {
   TaskQError,
@@ -13,7 +13,7 @@ export {
   ConflictError,
   DatabaseError,
   CheckoutError,
-} from './utils/errors';
+} from './utils/errors.js';
 
 export {
   validateQueueName,
@@ -22,4 +22,4 @@ export {
   validateTaskStatus,
   validateParameters,
   validateTaskId,
-} from './utils/validation';
+} from './utils/validation.js';

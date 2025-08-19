@@ -1,12 +1,12 @@
 /* eslint-disable no-dupe-class-members */
-import { TaskQDatabase } from './database/Database';
-import { Configuration, ConfigOptions } from './config/Configuration';
-import { QueueOperations } from './operations/QueueOperations';
-import { TaskOperations } from './operations/TaskOperations';
-import { JournalOperations } from './operations/JournalOperations';
-import { Queue, CreateQueueRequest, UpdateQueueRequest } from './models/Queue';
-import { Task, TaskStatus, CreateTaskRequest, UpdateTaskRequest } from './models/Task';
-import { TaskJournalEntry, CreateTaskJournalRequest } from './models/TaskJournal';
+import { TaskQDatabase } from './database/Database.js';
+import { Configuration, ConfigOptions } from './config/Configuration.js';
+import { QueueOperations } from './operations/QueueOperations.js';
+import { TaskOperations } from './operations/TaskOperations.js';
+import { JournalOperations } from './operations/JournalOperations.js';
+import { Queue, CreateQueueRequest, UpdateQueueRequest } from './models/Queue.js';
+import { Task, TaskStatus, CreateTaskRequest, UpdateTaskRequest } from './models/Task.js';
+import { TaskJournalEntry, CreateTaskJournalRequest } from './models/TaskJournal.js';
 
 export class TaskStore {
   private readonly db: TaskQDatabase;

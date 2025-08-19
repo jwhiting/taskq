@@ -3,9 +3,9 @@
 import { Command } from 'commander';
 import { readFileSync } from 'fs';
 import { join } from 'path';
-import { registerQueueCommands } from './commands/queue';
-import { registerTaskCommands } from './commands/task';
-import { registerStatusCommands } from './commands/status';
+import { registerQueueCommands } from './commands/queue.js';
+import { registerTaskCommands } from './commands/task.js';
+import { registerStatusCommands } from './commands/status.js';
 
 function getVersion(): string {
   try {

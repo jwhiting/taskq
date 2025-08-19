@@ -1,7 +1,7 @@
 import { Command } from 'commander';
-import { TaskStore } from '../../core/TaskStore';
-import { TaskStatus } from '../../core/models/Task';
-import { formatTask, formatTaskTable, parseParameters } from '../utils/formatting';
+import { TaskStore } from '../../core/TaskStore.js';
+import { TaskStatus } from '../../core/models/Task.js';
+import { formatTask, formatTaskTable, parseParameters } from '../utils/formatting.js';
 
 export function registerTaskCommands(program: Command): void {
   program

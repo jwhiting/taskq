@@ -1,7 +1,7 @@
 import Database from 'better-sqlite3';
 import fs from 'fs';
 import path from 'path';
-import { Configuration } from '../config/Configuration';
+import { Configuration } from '../config/Configuration.js';
 
 export class TaskQDatabase {
   private db: Database.Database;

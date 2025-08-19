@@ -2,10 +2,10 @@
 
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
-import { TaskStore } from '../core/index';
-import { registerQueueTools } from './tools/queue-tools';
-import { registerTaskTools } from './tools/task-tools';
-import { registerStatusTools } from './tools/status-tools';
+import { TaskStore } from '../core/index.js';
+import { registerQueueTools } from './tools/queue-tools.js';
+import { registerTaskTools } from './tools/task-tools.js';
+import { registerStatusTools } from './tools/status-tools.js';
 
 async function main() {
   // Initialize TaskStore with configuration

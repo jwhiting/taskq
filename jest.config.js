@@ -16,13 +16,13 @@ export default {
   // Uncomment these for debugging hanging tests:
   // forceExit: true, // Force Jest to exit if handles remain open
   // detectOpenHandles: true, // Show what's keeping Jest alive
-  globals: {
-    'ts-jest': {
+  transform: {
+    '^.+\\.ts$': ['ts-jest', {
       useESM: true,
       tsconfig: 'tsconfig.test.json'
-    }
+    }]
   },
-  moduleNameMapping: {
+  moduleNameMapper: {
     '^(\\.{1,2}/.*)\\.js$': '$1',
   },
 };

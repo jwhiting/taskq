@@ -1,7 +1,7 @@
 import Database from 'better-sqlite3';
-import { TaskJournalEntry, CreateTaskJournalRequest } from '../models/TaskJournal';
-import { validateTaskId, validateTaskStatus } from '../utils/validation';
-import { NotFoundError, DatabaseError } from '../utils/errors';
+import { TaskJournalEntry, CreateTaskJournalRequest } from '../models/TaskJournal.js';
+import { validateTaskId, validateTaskStatus } from '../utils/validation.js';
+import { NotFoundError, DatabaseError } from '../utils/errors.js';
 
 export class JournalOperations {
   constructor(private readonly db: Database.Database) {}

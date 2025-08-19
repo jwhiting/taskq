@@ -83,11 +83,6 @@ RUN ARCH=$(dpkg --print-architecture) && \
 # this will later be removed by the firewall script at runtime.
 RUN echo "node ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers
 
-# Enable corepack for Yarn Berry support (needs root permissions)
-# Set COREPACK_ENABLE_DOWNLOAD_PROMPT=0 to avoid interactive prompts
-ENV COREPACK_ENABLE_DOWNLOAD_PROMPT=0
-RUN corepack enable
-
 # Set up non-root user
 USER node
 

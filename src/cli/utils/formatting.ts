@@ -1,6 +1,6 @@
-import { Queue } from '../../core/models/Queue';
-import { Task } from '../../core/models/Task';
-import { TaskJournalEntry } from '../../core/models/TaskJournal';
+import { Queue } from '../../core/models/Queue.js';
+import { Task } from '../../core/models/Task.js';
+import { TaskJournalEntry } from '../../core/models/TaskJournal.js';
 
 export function formatQueue(queue: Queue): string {
   const lines = [

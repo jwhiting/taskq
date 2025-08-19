@@ -3,10 +3,10 @@ import { InMemoryTransport } from "@modelcontextprotocol/sdk/inMemory.js";
 import { tmpdir } from "os";
 import { join } from "path";
 import { unlinkSync, existsSync } from "fs";
-import { TaskStore } from "../../src/core/index";
-import { registerQueueTools } from "../../src/mcp-server/tools/queue-tools";
-import { registerTaskTools } from "../../src/mcp-server/tools/task-tools";
-import { registerStatusTools } from "../../src/mcp-server/tools/status-tools";
+import { TaskStore } from "../../src/core/index.js";
+import { registerQueueTools } from "../../src/mcp-server/tools/queue-tools.js";
+import { registerTaskTools } from "../../src/mcp-server/tools/task-tools.js";
+import { registerStatusTools } from "../../src/mcp-server/tools/status-tools.js";
 
 describe("TaskQ MCP Server - Full Integration Tests", () => {
   let taskStore: TaskStore;

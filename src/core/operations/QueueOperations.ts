@@ -1,7 +1,7 @@
 import Database from 'better-sqlite3';
-import { Queue, CreateQueueRequest, UpdateQueueRequest } from '../models/Queue';
-import { validateQueueName } from '../utils/validation';
-import { NotFoundError, ConflictError, DatabaseError } from '../utils/errors';
+import { Queue, CreateQueueRequest, UpdateQueueRequest } from '../models/Queue.js';
+import { validateQueueName } from '../utils/validation.js';
+import { NotFoundError, ConflictError, DatabaseError } from '../utils/errors.js';
 
 export class QueueOperations {
   constructor(private readonly db: Database.Database) {}

@@ -41,14 +41,15 @@
         "typescript.preferences.useAliasesForRenames": false,
         "typescript.updateImportsOnFileMove.enabled": "always",
         "typescript.suggest.autoImports": true,
-        "jest.jestCommandLine": "yarn test",
+        "jest.jestCommandLine": "npm test",
         "jest.autoRun": "off",
         "search.exclude": {
+          "**/node_modules": true,
           "**/.yarn": true,
           "**/.pnp.*": true
         },
-        "eslint.packageManager": "yarn",
-        "prettier.packageManager": "yarn"
+        "eslint.packageManager": "npm",
+        "prettier.packageManager": "npm"
       }
     }
   },
@@ -57,18 +58,17 @@
     "source=claude-code-bashhistory-${devcontainerId},target=/commandhistory,type=volume",
     "source=${localWorkspaceFolder}/.devcontainer,target=/workspace/.devcontainer,type=bind,readonly",
     "source=${localEnv:HOME}/.claude,target=/home/node/.claude,type=bind",
-    "target=/workspace/.yarn/cache,type=volume",
-    "target=/workspace/.yarn/unplugged,type=volume"
+    "target=/workspace/node_modules,type=volume"
     // "target=/workspace/.venv,type=volume"
   ],
   "remoteEnv": {
     "NODE_OPTIONS": "--max-old-space-size=4096",
     "POWERLEVEL9K_DISABLE_GITSTATUS": "true",
     "CLAUDE_CONFIG_DIR": "/home/node/.claude",
-    "ALLOWED_DOMAINS": "repo.yarnpkg.com"
+    "ALLOWED_DOMAINS": ""
     // "PYPROJECT_TOML": "/workspace/pyproject.toml"
   },
   "workspaceMount": "source=${localWorkspaceFolder},target=/workspace,type=bind,consistency=delegated",
   "workspaceFolder": "/workspace",
-  "postCreateCommand": "sudo -E /usr/local/bin/init-firewall.sh && sudo /usr/local/bin/correct-volume-permissions.sh && sudo /usr/local/bin/remove-sudo.sh && /usr/local/bin/setup-python.sh && yarn install && echo 'TaskQ development environment ready!'"
+  "postCreateCommand": "sudo -E /usr/local/bin/init-firewall.sh && sudo /usr/local/bin/correct-volume-permissions.sh && sudo /usr/local/bin/remove-sudo.sh && /usr/local/bin/setup-python.sh && npm install && echo 'TaskQ development environment ready!'"
 }

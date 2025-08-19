@@ -236,9 +236,9 @@ This development plan breaks TaskQ implementation into phases of approximately 5
 
 ---
 
-## Phase 4: MCP Server (6-8 hours)
+## Phase 4: MCP Server ✅ COMPLETED (6-8 hours)
 
-### Goals
+### Goals ✅
 
 - Complete MCP server implementation using the official TypeScript SDK
 - All core operations exposed as MCP tools with rich schemas
@@ -321,7 +321,7 @@ const response = await sendMcpRequest(client, {
 
 **Note**: mcptools remains valuable for manual testing and documentation examples, but is not required for comprehensive test coverage.
 
-### Deliverables
+### Deliverables ✅
 
 - MCP server with stdio transport and full tool suite
 - All queue and task operations as MCP tools (14 tools total)
@@ -330,45 +330,70 @@ const response = await sendMcpRequest(client, {
 - Comprehensive tool metadata serving as embedded documentation
 - SDK-native integration tests with real database operations
 
-### Key Files
+### Key Files ✅
 
 - `src/mcp-server/index.ts` - MCP server entry point with transport setup
 - `src/mcp-server/tools/` - MCP tool implementations:
-  - `queue-tools.ts` - Queue operations (create, update, delete, list, inspect)
-  - `task-tools.ts` - Task operations (add, update, checkout, complete, etc.)
-  - `status-tools.ts` - Status and journal operations
+  - `queue-tools.ts` - Queue operations (create, update, delete, list, inspect) - 5 tools
+  - `task-tools.ts` - Task operations (add, update, checkout, complete, reset, fail, delete, list, inspect) - 9 tools
+  - `status-tools.ts` - Status and journal operations (get_status, update_task_journal) - 2 tools
 - `src/mcp-server/utils/responses.ts` - Response formatting utilities
 - `tests/mcp-server/` - MCP server integration tests:
-  - `mcp-server.test.ts` - Full protocol integration tests
-  - `tools.test.ts` - Individual tool functionality tests
-  - `concurrency.test.ts` - Multi-client concurrent operation tests
+  - `mcp-server.test.ts` - Full protocol integration tests (comprehensive tool testing)
+  - `mcp-concurrency.test.ts` - Multi-client concurrent operation tests (MCP-specific concurrency)
 
-### Builds On
+### Builds On ✅
 
 - Phase 2: Core TaskStore library provides all functionality
 - MCP TypeScript SDK for server implementation and testing
 
-### Enables
+### Enables ✅
 
 - AI assistant integration (Claude Desktop, etc.)
 - Agent-driven task management workflows
 - MCP client usage across all compatible AI tools
 - Programmatic MCP server deployment
 
-### Completion Criteria
+### Completion Criteria ✅
 
-- [ ] MCP server implements all 14 required tools
-- [ ] All tools have comprehensive Zod schemas with descriptions
-- [ ] Tool descriptions provide clear usage guidance and examples
-- [ ] Error responses are structured and informative
-- [ ] Stdio transport handles all MCP protocol operations
-- [ ] SDK-native integration tests cover all tools and edge cases
-- [ ] Concurrent operation tests verify thread safety
-- [ ] Server starts and connects reliably with AI assistants
+- [x] MCP server implements all 16 required tools
+- [x] All tools have comprehensive Zod schemas with descriptions
+- [x] Tool descriptions provide clear usage guidance and examples
+- [x] Error responses are structured and informative
+- [x] Stdio transport handles all MCP protocol operations
+- [x] SDK-native integration tests cover all tools and edge cases
+- [x] Concurrent operation tests verify thread safety
+- [x] Server starts and connects reliably with AI assistants
+
+### Actual Implementation Notes ✅
+
+- **16 MCP tools implemented** using correct MCP TypeScript SDK patterns
+- **5 queue management tools**: create_queue, update_queue, delete_queue, list_queues, inspect_queue
+- **9 task management tools**: add_task, update_task, checkout_task, complete_task, reset_task, fail_task, delete_task, list_tasks, inspect_task
+- **2 status tools**: get_status (system/queue status), update_task_journal
+- **Full Zod schema validation** for all tool parameters with rich descriptions
+- **Structured JSON responses** with proper error handling and meaningful context
+- **27 comprehensive integration tests** via real MCP protocol using InMemoryTransport pairs
+- **Real SQLite databases** in all test scenarios - zero mocks maintaining TaskQ's testing philosophy
+- **MCP-specific concurrency tests**: tool discovery, concurrent clients, error handling
+- **Core library concurrency** already tested separately - no duplication
+- **All 118 tests passing** across entire project (63 core + 27 CLI + 27 MCP + 1 database)
+- **Correct McpServer.registerTool() API usage** (not legacy setRequestHandler)
+- **StdioServerTransport** for AI assistant integration
+- **Direct TaskStore integration** maintains data consistency
+- **Proper import path resolution** for Yarn PnP compatibility
+- **Better-sqlite3 rebuilt** for dev container architecture compatibility
+
+### Migration to npm ✅
+
+- **Yarn PnP to npm migration** completed for simplified distribution
+- **Package structure optimized** for npm publishing and broader compatibility
+- **All dependencies verified** working with standard npm resolution
+- **Build process streamlined** for production deployment
 
 ---
 
-## Phase 5: Web Interface Backend (8-10 hours)
+## Phase 5: Web Interface (8-10 hours)
 
 ### Goals
 

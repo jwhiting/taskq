@@ -1,7 +1,7 @@
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { z } from 'zod';
-import { TaskStore } from '../../core/index';
-import { formatTable } from '../utils/responses';
+import { TaskStore } from '../../core/index.js';
+import { formatTable } from '../utils/responses.js';
 
 /**
  * Register all status and journal tools with the MCP server
