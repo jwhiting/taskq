@@ -4,8 +4,8 @@ import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import { TaskStore } from "../core/index.js";
 import { registerQueueTools } from "./tools/queue-tools.js";
-// import { registerTaskTools } from "./tools/task-tools.js";
-// import { registerStatusTools } from "./tools/status-tools.js";
+import { registerTaskTools } from "./tools/task-tools.js";
+import { registerStatusTools } from "./tools/status-tools.js";
 
 async function main() {
   // Initialize TaskStore with configuration
@@ -17,12 +17,10 @@ async function main() {
     version: "0.1.0"
   });
 
-  // Register queue tools (5 tools) - working with correct MCP API
-  registerQueueTools(server, taskStore);
-  
-  // TODO: Implement task and status tools with correct MCP API
-  // registerTaskTools(server, taskStore);
-  // registerStatusTools(server, taskStore);
+  // Register all tools with correct MCP API (16 tools total)
+  registerQueueTools(server, taskStore);   // 5 queue tools
+  registerTaskTools(server, taskStore);    // 9 task tools  
+  registerStatusTools(server, taskStore);  // 2 status tools
 
   // Set up stdio transport
   const transport = new StdioServerTransport();
