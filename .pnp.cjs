@@ -34,6 +34,7 @@ const RAW_RUNTIME_STATE =
           ["@typescript-eslint/eslint-plugin", "virtual:9e09ffc51848c03aa354f44be061222aa1eb351bd9a3b3725144fc982e9608a49b5823a358d2a313afb9de0e04677ce377f860cf71a28388d9f65340b21a869c#npm:8.40.0"],\
           ["@typescript-eslint/parser", "virtual:9e09ffc51848c03aa354f44be061222aa1eb351bd9a3b3725144fc982e9608a49b5823a358d2a313afb9de0e04677ce377f860cf71a28388d9f65340b21a869c#npm:8.40.0"],\
           ["better-sqlite3", "npm:12.2.0"],\
+          ["commander", "npm:14.0.0"],\
           ["eslint", "npm:8.57.1"],\
           ["eslint-config-prettier", "virtual:9e09ffc51848c03aa354f44be061222aa1eb351bd9a3b3725144fc982e9608a49b5823a358d2a313afb9de0e04677ce377f860cf71a28388d9f65340b21a869c#npm:10.1.8"],\
           ["eslint-plugin-import", "virtual:9e09ffc51848c03aa354f44be061222aa1eb351bd9a3b3725144fc982e9608a49b5823a358d2a313afb9de0e04677ce377f860cf71a28388d9f65340b21a869c#npm:2.32.0"],\
@@ -2810,6 +2811,15 @@ const RAW_RUNTIME_STATE =
         "packageLocation": "./.yarn/cache/color-name-npm-1.1.4-025792b0ea-b044585952.zip/node_modules/color-name/",\
         "packageDependencies": [\
           ["color-name", "npm:1.1.4"]\
+        ],\
+        "linkType": "HARD"\
+      }]\
+    ]],\
+    ["commander", [\
+      ["npm:14.0.0", {\
+        "packageLocation": "./.yarn/cache/commander-npm-14.0.0-1e0a7932ab-c05418bfc3.zip/node_modules/commander/",\
+        "packageDependencies": [\
+          ["commander", "npm:14.0.0"]\
         ],\
         "linkType": "HARD"\
       }]\
@@ -6925,6 +6935,7 @@ const RAW_RUNTIME_STATE =
           ["@typescript-eslint/eslint-plugin", "virtual:9e09ffc51848c03aa354f44be061222aa1eb351bd9a3b3725144fc982e9608a49b5823a358d2a313afb9de0e04677ce377f860cf71a28388d9f65340b21a869c#npm:8.40.0"],\
           ["@typescript-eslint/parser", "virtual:9e09ffc51848c03aa354f44be061222aa1eb351bd9a3b3725144fc982e9608a49b5823a358d2a313afb9de0e04677ce377f860cf71a28388d9f65340b21a869c#npm:8.40.0"],\
           ["better-sqlite3", "npm:12.2.0"],\
+          ["commander", "npm:14.0.0"],\
           ["eslint", "npm:8.57.1"],\
           ["eslint-config-prettier", "virtual:9e09ffc51848c03aa354f44be061222aa1eb351bd9a3b3725144fc982e9608a49b5823a358d2a313afb9de0e04677ce377f860cf71a28388d9f65340b21a869c#npm:10.1.8"],\
           ["eslint-plugin-import", "virtual:9e09ffc51848c03aa354f44be061222aa1eb351bd9a3b3725144fc982e9608a49b5823a358d2a313afb9de0e04677ce377f860cf71a28388d9f65340b21a869c#npm:2.32.0"],\

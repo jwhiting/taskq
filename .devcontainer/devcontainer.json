@@ -56,7 +56,9 @@
   "mounts": [
     "source=claude-code-bashhistory-${devcontainerId},target=/commandhistory,type=volume",
     "source=${localWorkspaceFolder}/.devcontainer,target=/workspace/.devcontainer,type=bind,readonly",
-    "source=${localEnv:HOME}/.claude,target=/home/node/.claude,type=bind"
+    "source=${localEnv:HOME}/.claude,target=/home/node/.claude,type=bind",
+    "target=/workspace/.yarn/cache,type=volume",
+    "target=/workspace/.yarn/unplugged,type=volume"
     // "target=/workspace/.venv,type=volume"
   ],
   "remoteEnv": {

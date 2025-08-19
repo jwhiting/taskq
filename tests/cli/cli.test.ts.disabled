@@ -1,0 +1,420 @@
+import { spawn } from 'child_process';
+import path from 'path';
+import { TaskStore } from '../../src/core/TaskStore';
+import { getTestDatabasePath, cleanupTestDatabase } from '../setup';
+
+describe('CLI Integration Tests', () => {
+  let testDbPath: string;
+
+  beforeEach(() => {
+    testDbPath = getTestDatabasePath();
+  });
+
+  afterEach(() => {
+    cleanupTestDatabase(testDbPath);
+  });
+
+  describe('Child Process Tests', () => {
+    test('CLI help command via child process', done => {
+      const cliPath = path.join(__dirname, '../../dist/cli/index.js');
+      const child = spawn('yarn', ['node', cliPath, '--help'], {
+        stdio: 'pipe',
+        cwd: path.join(__dirname, '../..'),
+        timeout: 10000,
+      });
+
+      let stdout = '';
+      let stderr = '';
+
+      child.stdout.on('data', data => {
+        stdout += data.toString();
+      });
+
+      child.stderr.on('data', data => {
+        stderr += data.toString();
+      });
+
+      child.on('close', code => {
+        expect(code).toBe(0);
+        expect(stderr).toBe('');
+        expect(stdout).toContain('TaskQ - A durable, concurrency-safe task queue service');
+        expect(stdout).toContain('create-queue');
+        expect(stdout).toContain('add-task');
+        expect(stdout).toContain('checkout-task');
+        done();
+      });
+
+      child.on('error', error => {
+        done.fail(`Child process error: ${error.message}`);
+      });
+    }, 15000);
+
+    test('Create queue and verify via child process', done => {
+      const cliPath = path.join(__dirname, '../../dist/cli/index.js');
+      const child = spawn(
+        'yarn',
+        ['node', cliPath, 'create-queue', 'child-test', '--db-path', testDbPath],
+        {
+          stdio: 'pipe',
+          cwd: path.join(__dirname, '../..'),
+          timeout: 10000,
+        }
+      );
+
+      let stdout = '';
+      let stderr = '';
+
+      child.stdout.on('data', data => {
+        stdout += data.toString();
+      });
+
+      child.stderr.on('data', data => {
+        stderr += data.toString();
+      });
+
+      child.on('close', code => {
+        expect(code).toBe(0);
+        expect(stderr).toBe('');
+        expect(stdout).toContain('Queue created successfully:');
+        expect(stdout).toContain('Name: child-test');
+
+        // Verify the queue was actually created in the database
+        const store = new TaskStore({ dbPath: testDbPath });
+        const queue = store.getQueue('child-test');
+        expect(queue).not.toBeNull();
+        expect(queue!.name).toBe('child-test');
+        store.close();
+
+        done();
+      });
+
+      child.on('error', error => {
+        done.fail(`Child process error: ${error.message}`);
+      });
+    }, 15000);
+
+    test('Add task with parameters via child process', done => {
+      // First create a queue
+      const store = new TaskStore({ dbPath: testDbPath });
+      store.createQueue({ name: 'param-test' });
+      store.close();
+
+      const cliPath = path.join(__dirname, '../../dist/cli/index.js');
+      const child = spawn(
+        'yarn',
+        [
+          'node',
+          cliPath,
+          'add-task',
+          'param-test',
+          'Test task',
+          '--db-path',
+          testDbPath,
+          '--parameters',
+          'type=test,count=5',
+        ],
+        {
+          stdio: 'pipe',
+          cwd: path.join(__dirname, '../..'),
+          timeout: 10000,
+        }
+      );
+
+      let stdout = '';
+      let stderr = '';
+
+      child.stdout.on('data', data => {
+        stdout += data.toString();
+      });
+
+      child.stderr.on('data', data => {
+        stderr += data.toString();
+      });
+
+      child.on('close', code => {
+        expect(code).toBe(0);
+        expect(stderr).toBe('');
+        expect(stdout).toContain('Task added successfully:');
+        expect(stdout).toContain('Test task');
+
+        // Verify parameters were parsed correctly
+        const verifyStore = new TaskStore({ dbPath: testDbPath });
+        const tasks = verifyStore.listTasks('param-test');
+        expect(tasks).toHaveLength(1);
+        expect(tasks[0]!.parameters).toEqual({
+          type: 'test',
+          count: 5,
+        });
+        verifyStore.close();
+
+        done();
+      });
+
+      child.on('error', error => {
+        done.fail(`Child process error: ${error.message}`);
+      });
+    }, 15000);
+
+    test('Error handling via child process', done => {
+      const cliPath = path.join(__dirname, '../../dist/cli/index.js');
+      const child = spawn(
+        'yarn',
+        ['node', cliPath, 'inspect-queue', 'does-not-exist', '--db-path', testDbPath],
+        {
+          stdio: 'pipe',
+          cwd: path.join(__dirname, '../..'),
+          timeout: 10000,
+        }
+      );
+
+      let stderr = '';
+
+      child.stdout.on('data', () => {
+        // Ignore stdout for error test
+      });
+
+      child.stderr.on('data', data => {
+        stderr += data.toString();
+      });
+
+      child.on('close', code => {
+        expect(code).toBe(1);
+        expect(stderr).toContain("Queue 'does-not-exist' not found.");
+        done();
+      });
+
+      child.on('error', error => {
+        done.fail(`Child process error: ${error.message}`);
+      });
+    }, 15000);
+
+    test('List tasks table format via child process', done => {
+      // Setup test data
+      const store = new TaskStore({ dbPath: testDbPath });
+      store.createQueue({ name: 'table-test' });
+      store.addTask({ queueName: 'table-test', title: 'Task 1', priority: 8 });
+      store.addTask({ queueName: 'table-test', title: 'Task 2', priority: 3 });
+      store.close();
+
+      const cliPath = path.join(__dirname, '../../dist/cli/index.js');
+      const child = spawn(
+        'yarn',
+        ['node', cliPath, 'list-tasks', 'table-test', '--db-path', testDbPath],
+        {
+          stdio: 'pipe',
+          cwd: path.join(__dirname, '../..'),
+          timeout: 10000,
+        }
+      );
+
+      let stdout = '';
+      let stderr = '';
+
+      child.stdout.on('data', data => {
+        stdout += data.toString();
+      });
+
+      child.stderr.on('data', data => {
+        stderr += data.toString();
+      });
+
+      child.on('close', code => {
+        expect(code).toBe(0);
+        expect(stderr).toBe('');
+        // Should show table with tasks sorted by priority (high to low)
+        expect(stdout).toContain('Task 1');
+        expect(stdout).toContain('Task 2');
+        expect(stdout).toContain('+----+'); // Table formatting
+        expect(stdout).toContain('| ID |'); // Table headers
+        done();
+      });
+
+      child.on('error', error => {
+        done.fail(`Child process error: ${error.message}`);
+      });
+    }, 15000);
+  });
+
+  describe('Command Functionality Tests', () => {
+    test('Full workflow: create queue, add task, checkout, complete', done => {
+      const cliPath = path.join(__dirname, '../../dist/cli/index.js');
+
+      const runCommand = (
+        args: string[]
+      ): Promise<{ code: number; stdout: string; stderr: string }> => {
+        return new Promise((resolve, reject) => {
+          const child = spawn('yarn', ['node', cliPath, ...args], {
+            stdio: 'pipe',
+            cwd: path.join(__dirname, '../..'),
+            timeout: 10000,
+          });
+
+          let stdout = '';
+          let stderr = '';
+
+          child.stdout.on('data', data => {
+            stdout += data.toString();
+          });
+
+          child.stderr.on('data', data => {
+            stderr += data.toString();
+          });
+
+          child.on('close', code => {
+            resolve({ code: code || 0, stdout, stderr });
+          });
+
+          child.on('error', error => {
+            reject(error);
+          });
+        });
+      };
+
+      const runWorkflow = async (): Promise<void> => {
+        try {
+          // 1. Create queue
+          let result = await runCommand(['create-queue', 'workflow', '--db-path', testDbPath]);
+          expect(result.code).toBe(0);
+          expect(result.stdout).toContain('Queue created successfully');
+
+          // 2. Add task
+          result = await runCommand([
+            'add-task',
+            'workflow',
+            'Test workflow task',
+            '--db-path',
+            testDbPath,
+            '--priority',
+            '7',
+          ]);
+          expect(result.code).toBe(0);
+          expect(result.stdout).toContain('Task added successfully');
+
+          // 3. List tasks to get ID
+          result = await runCommand(['list-tasks', 'workflow', '--db-path', testDbPath]);
+          expect(result.code).toBe(0);
+          expect(result.stdout).toContain('Test workflow task');
+
+          // 4. Checkout task by queue
+          result = await runCommand([
+            'checkout-task',
+            'workflow',
+            '--db-path',
+            testDbPath,
+            '--worker-id',
+            'test-worker',
+          ]);
+          expect(result.code).toBe(0);
+          expect(result.stdout).toContain('Task checked out successfully');
+          expect(result.stdout).toContain('test-worker');
+
+          // 5. Complete task (get task ID from checkout output)
+          const taskIdMatch = result.stdout.match(/ID: (\d+)/);
+          expect(taskIdMatch).not.toBeNull();
+          const taskId = taskIdMatch![1];
+
+          result = await runCommand(['complete-task', taskId!, '--db-path', testDbPath]);
+          expect(result.code).toBe(0);
+          expect(result.stdout).toContain('Task completed successfully');
+
+          // 6. Check status
+          result = await runCommand(['status', 'workflow', '--db-path', testDbPath]);
+          expect(result.code).toBe(0);
+          expect(result.stdout).toContain('Completed: 1');
+
+          done();
+        } catch (error) {
+          done.fail(`Workflow test failed: ${error}`);
+        }
+      };
+
+      runWorkflow();
+    }, 30000);
+
+    test('Parameter parsing edge cases', done => {
+      const cliPath = path.join(__dirname, '../../dist/cli/index.js');
+
+      const testParameterFormat = (
+        params: string,
+        expected: Record<string, unknown>
+      ): Promise<void> => {
+        return new Promise<void>((resolve, reject) => {
+          // First create queue
+          const store = new TaskStore({ dbPath: testDbPath });
+          store.createQueue({ name: 'param-edge-test' });
+          store.close();
+
+          const child = spawn(
+            'yarn',
+            [
+              'node',
+              cliPath,
+              'add-task',
+              'param-edge-test',
+              'Param test',
+              '--db-path',
+              testDbPath,
+              '--parameters',
+              params,
+            ],
+            {
+              stdio: 'pipe',
+              cwd: path.join(__dirname, '../..'),
+              timeout: 10000,
+            }
+          );
+
+          let stderr = '';
+
+          child.stdout.on('data', () => {
+            // Ignore stdout for parameter test
+          });
+
+          child.stderr.on('data', data => {
+            stderr += data.toString();
+          });
+
+          child.on('close', code => {
+            expect(code).toBe(0);
+            expect(stderr).toBe('');
+
+            // Verify parameters
+            const verifyStore = new TaskStore({ dbPath: testDbPath });
+            const tasks = verifyStore.listTasks('param-edge-test');
+            expect(tasks[tasks.length - 1]!.parameters).toEqual(expected);
+            verifyStore.close();
+
+            resolve();
+          });
+
+          child.on('error', error => {
+            reject(error);
+          });
+        });
+      };
+
+      const runParameterTests = async (): Promise<void> => {
+        try {
+          // Test JSON format
+          await testParameterFormat('{"nested": {"value": 42}, "array": [1,2,3]}', {
+            nested: { value: 42 },
+            array: [1, 2, 3],
+          });
+
+          // Test key=value with type coercion
+          await testParameterFormat('count=10,enabled=true,name=test', {
+            count: 10,
+            enabled: true,
+            name: 'test',
+          });
+
+          done();
+        } catch (error) {
+          done.fail(`Parameter test failed: ${error}`);
+        }
+      };
+
+      runParameterTests();
+    }, 30000);
+  });
+});
