@@ -238,50 +238,133 @@ This development plan breaks TaskQ implementation into phases of approximately 5
 
 ## Phase 4: MCP Server (6-8 hours)
 
-Refer to https://github.com/modelcontextprotocol/typescript-sdk
-
-Write end to end tests using calls to https://github.com/f/mcptools
-
 ### Goals
 
-- Complete MCP server implementation
-- All core operations exposed as tools
-- Rich tool documentation and schemas
-- Robust error handling
+- Complete MCP server implementation using the official TypeScript SDK
+- All core operations exposed as MCP tools with rich schemas
+- Comprehensive testing using SDK-native approaches
+- Robust error handling with structured responses
+
+### Technical Approach
+
+#### MCP TypeScript SDK Usage
+- **Framework**: `@modelcontextprotocol/sdk` for server implementation
+- **Transport**: `StdioServerTransport` for AI assistant communication
+- **Validation**: Zod schemas for all tool parameters
+- **Architecture**: Direct integration with TaskStore core library
+
+#### Server Implementation Pattern
+```typescript
+import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
+import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
+import { z } from "zod";
+
+const server = new McpServer({
+  name: "taskq-mcp-server",
+  version: "0.1.0"
+});
+
+// Register tools with rich schemas
+server.registerTool("create_queue", {
+  title: "Create Task Queue",
+  description: "Create a new named task queue",
+  inputSchema: {
+    name: z.string().describe("Queue name"),
+    description: z.string().optional(),
+    instructions: z.string().optional()
+  }
+}, async ({ name, description, instructions }) => {
+  // Direct TaskStore integration
+});
+```
+
+#### Testing Strategy: SDK-Native Mockless Testing
+
+**Philosophy**: Maintain TaskQ's no-mock approach using MCP SDK's built-in testing capabilities.
+
+**Core Testing Pattern**:
+```typescript
+import { InMemoryTransport } from "@modelcontextprotocol/sdk/inMemory.js";
+
+// Real MCP server + real TaskStore + real test database
+const taskStore = new TaskStore({ dbPath: testDbPath });
+const server = new TaskQMcpServer(taskStore);
+
+// Real transport pair (no mocks, no CLI)
+const { client, server: serverTransport } = InMemoryTransport.createLinkedPair();
+await server.connect(serverTransport);
+
+// Test real MCP protocol with real database operations
+const response = await sendMcpRequest(client, {
+  method: "tools/call",
+  params: { name: "create_queue", arguments: { name: "test" } }
+});
+```
+
+**Testing Benefits**:
+- **Full integration**: Tests complete MCP protocol flow
+- **Real concurrency**: Multiple transport pairs test race conditions
+- **Atomic transactions**: Same-process database access
+- **Debuggable**: Stack traces and breakpoints work
+- **Fast**: No subprocess overhead
+
+#### mcptools Consideration
+
+**Why we considered mcptools**: The `f/mcptools` CLI provides end-to-end testing of MCP servers from an external client perspective.
+
+**Why we chose SDK-native testing instead**:
+- **Consistency**: Maintains TaskQ's established no-mock testing philosophy
+- **Performance**: Direct API calls vs subprocess overhead
+- **Reliability**: No CLI parsing or external process dependencies
+- **Integration**: Better alignment with existing Jest test infrastructure
+- **Development**: Easier debugging and development workflow
+
+**Note**: mcptools remains valuable for manual testing and documentation examples, but is not required for comprehensive test coverage.
 
 ### Deliverables
 
-- MCP server with stdio transport
-- All queue and task operations as MCP tools
-- Comprehensive tool descriptions and parameter schemas
-- Error handling with context
-- Usage examples in tool metadata
+- MCP server with stdio transport and full tool suite
+- All queue and task operations as MCP tools (14 tools total)
+- Zod schemas with rich parameter descriptions and validation
+- Structured error handling with meaningful context
+- Comprehensive tool metadata serving as embedded documentation
+- SDK-native integration tests with real database operations
 
 ### Key Files
 
-- `src/mcp-server/index.ts` - MCP server entry point
-- `src/mcp-server/tools/` - MCP tool implementations
-- `src/mcp-server/utils/responses.ts` - Response formatting
-- `tests/mcp-server/` - MCP server integration tests
+- `src/mcp-server/index.ts` - MCP server entry point with transport setup
+- `src/mcp-server/tools/` - MCP tool implementations:
+  - `queue-tools.ts` - Queue operations (create, update, delete, list, inspect)
+  - `task-tools.ts` - Task operations (add, update, checkout, complete, etc.)
+  - `status-tools.ts` - Status and journal operations
+- `src/mcp-server/utils/responses.ts` - Response formatting utilities
+- `tests/mcp-server/` - MCP server integration tests:
+  - `mcp-server.test.ts` - Full protocol integration tests
+  - `tools.test.ts` - Individual tool functionality tests
+  - `concurrency.test.ts` - Multi-client concurrent operation tests
 
 ### Builds On
 
 - Phase 2: Core TaskStore library provides all functionality
+- MCP TypeScript SDK for server implementation and testing
 
 ### Enables
 
-- AI assistant integration
-- Agent-driven task management
-- MCP client usage (Claude Desktop, etc.)
+- AI assistant integration (Claude Desktop, etc.)
+- Agent-driven task management workflows
+- MCP client usage across all compatible AI tools
+- Programmatic MCP server deployment
 
 ### Completion Criteria
 
-- [ ] All MCP tools work correctly
-- [ ] Tool descriptions are comprehensive and clear
-- [ ] Parameter schemas validate properly
-- [ ] Error responses are informative
-- [ ] Stdio transport works reliably
-- [ ] Integration tests cover all tools
+- [ ] MCP server implements all 14 required tools
+- [ ] All tools have comprehensive Zod schemas with descriptions
+- [ ] Tool descriptions provide clear usage guidance and examples
+- [ ] Error responses are structured and informative
+- [ ] Stdio transport handles all MCP protocol operations
+- [ ] SDK-native integration tests cover all tools and edge cases
+- [ ] Concurrent operation tests verify thread safety
+- [ ] Server starts and connects reliably with AI assistants
 
 ---
 
