@@ -16,7 +16,7 @@ export function registerStatusCommands(program: Command): void {
           const queue = store.getQueue(queueName);
           if (!queue) {
             console.error(`Queue '${queueName}' not found.`);
-            process.exit(1);
+            throw new Error(`Queue '${queueName}' not found.`);
           }
 
           const stats = store.getQueueStats(queueName);
@@ -66,7 +66,7 @@ export function registerStatusCommands(program: Command): void {
       } catch (error) {
         const err = error as Error;
         console.error('Error getting status:', err.message);
-        process.exit(1);
+        throw err; // Let Commander handle the exit via exitOverride
       }
     });
 
@@ -81,14 +81,14 @@ export function registerStatusCommands(program: Command): void {
         const taskId = parseInt(taskIdStr, 10);
         if (isNaN(taskId)) {
           console.error('Invalid task ID. Must be a number.');
-          process.exit(1);
+          throw new Error('Invalid task ID. Must be a number.');
         }
 
         // Verify task exists
         const task = store.getTask(taskId);
         if (!task) {
           console.error(`Task ${taskId} not found.`);
-          process.exit(1);
+          throw new Error(`Task ${taskId} not found.`);
         }
 
         const journal = store.getTaskJournal(taskId);
@@ -97,7 +97,7 @@ export function registerStatusCommands(program: Command): void {
       } catch (error) {
         const err = error as Error;
         console.error('Error getting journal:', err.message);
-        process.exit(1);
+        throw err; // Let Commander handle the exit via exitOverride
       }
     });
 }

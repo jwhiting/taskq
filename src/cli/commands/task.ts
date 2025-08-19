@@ -46,7 +46,7 @@ export function registerTaskCommands(program: Command): void {
         } catch (error) {
           const err = error as Error;
           console.error('Error adding task:', err.message);
-          process.exit(1);
+          throw err; // Let Commander handle the exit via exitOverride
         }
       }
     );
@@ -80,7 +80,7 @@ export function registerTaskCommands(program: Command): void {
           const taskId = parseInt(taskIdStr, 10);
           if (isNaN(taskId)) {
             console.error('Invalid task ID. Must be a number.');
-            process.exit(1);
+            throw new Error('Invalid task ID. Must be a number.');
           }
 
           let parameters: Record<string, unknown> | undefined;
@@ -101,7 +101,7 @@ export function registerTaskCommands(program: Command): void {
         } catch (error) {
           const err = error as Error;
           console.error('Error updating task:', err.message);
-          process.exit(1);
+          throw err; // Let Commander handle the exit via exitOverride
         }
       }
     );
@@ -129,7 +129,7 @@ export function registerTaskCommands(program: Command): void {
 
         if (!task) {
           console.log('No available tasks to checkout.');
-          process.exit(0);
+          return; // Exit gracefully, no error
         }
 
         console.log('Task checked out successfully:');
@@ -137,7 +137,7 @@ export function registerTaskCommands(program: Command): void {
       } catch (error) {
         const err = error as Error;
         console.error('Error checking out task:', err.message);
-        process.exit(1);
+        throw err; // Let Commander handle the exit via exitOverride
       }
     });
 
@@ -152,7 +152,7 @@ export function registerTaskCommands(program: Command): void {
         const taskId = parseInt(taskIdStr, 10);
         if (isNaN(taskId)) {
           console.error('Invalid task ID. Must be a number.');
-          process.exit(1);
+          throw new Error('Invalid task ID. Must be a number.');
         }
 
         const task = store.completeTask(taskId);
@@ -161,7 +161,7 @@ export function registerTaskCommands(program: Command): void {
       } catch (error) {
         const err = error as Error;
         console.error('Error completing task:', err.message);
-        process.exit(1);
+        throw err; // Let Commander handle the exit via exitOverride
       }
     });
 
@@ -176,7 +176,7 @@ export function registerTaskCommands(program: Command): void {
         const taskId = parseInt(taskIdStr, 10);
         if (isNaN(taskId)) {
           console.error('Invalid task ID. Must be a number.');
-          process.exit(1);
+          throw new Error('Invalid task ID. Must be a number.');
         }
 
         const task = store.resetTask(taskId);
@@ -185,7 +185,7 @@ export function registerTaskCommands(program: Command): void {
       } catch (error) {
         const err = error as Error;
         console.error('Error resetting task:', err.message);
-        process.exit(1);
+        throw err; // Let Commander handle the exit via exitOverride
       }
     });
 
@@ -200,7 +200,7 @@ export function registerTaskCommands(program: Command): void {
         const taskId = parseInt(taskIdStr, 10);
         if (isNaN(taskId)) {
           console.error('Invalid task ID. Must be a number.');
-          process.exit(1);
+          throw new Error('Invalid task ID. Must be a number.');
         }
 
         const task = store.failTask(taskId);
@@ -209,7 +209,7 @@ export function registerTaskCommands(program: Command): void {
       } catch (error) {
         const err = error as Error;
         console.error('Error failing task:', err.message);
-        process.exit(1);
+        throw err; // Let Commander handle the exit via exitOverride
       }
     });
 
@@ -224,7 +224,7 @@ export function registerTaskCommands(program: Command): void {
         const taskId = parseInt(taskIdStr, 10);
         if (isNaN(taskId)) {
           console.error('Invalid task ID. Must be a number.');
-          process.exit(1);
+          throw new Error('Invalid task ID. Must be a number.');
         }
 
         store.deleteTask(taskId);
@@ -232,7 +232,7 @@ export function registerTaskCommands(program: Command): void {
       } catch (error) {
         const err = error as Error;
         console.error('Error deleting task:', err.message);
-        process.exit(1);
+        throw err; // Let Commander handle the exit via exitOverride
       }
     });
 
@@ -251,7 +251,7 @@ export function registerTaskCommands(program: Command): void {
           const validStatuses: TaskStatus[] = ['pending', 'checked_out', 'completed', 'failed'];
           if (!validStatuses.includes(options.status as TaskStatus)) {
             console.error(`Invalid status. Must be one of: ${validStatuses.join(', ')}`);
-            process.exit(1);
+            throw new Error(`Invalid status. Must be one of: ${validStatuses.join(', ')}`);
           }
           status = options.status as TaskStatus;
         }
@@ -259,7 +259,7 @@ export function registerTaskCommands(program: Command): void {
         const limit = parseInt(options.limit || '50', 10);
         if (isNaN(limit) || limit <= 0) {
           console.error('Limit must be a positive number.');
-          process.exit(1);
+          throw new Error('Limit must be a positive number.');
         }
 
         const tasks = store.listTasks(queueName, status, limit);
@@ -267,7 +267,7 @@ export function registerTaskCommands(program: Command): void {
       } catch (error) {
         const err = error as Error;
         console.error('Error listing tasks:', err.message);
-        process.exit(1);
+        throw err; // Let Commander handle the exit via exitOverride
       }
     });
 
@@ -282,20 +282,20 @@ export function registerTaskCommands(program: Command): void {
         const taskId = parseInt(taskIdStr, 10);
         if (isNaN(taskId)) {
           console.error('Invalid task ID. Must be a number.');
-          process.exit(1);
+          throw new Error('Invalid task ID. Must be a number.');
         }
 
         const task = store.getTask(taskId);
         if (!task) {
           console.error(`Task ${taskId} not found.`);
-          process.exit(1);
+          throw new Error(`Task ${taskId} not found.`);
         }
 
         console.log(formatTask(task));
       } catch (error) {
         const err = error as Error;
         console.error('Error inspecting task:', err.message);
-        process.exit(1);
+        throw err; // Let Commander handle the exit via exitOverride
       }
     });
 }

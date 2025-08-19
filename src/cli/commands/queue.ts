@@ -24,7 +24,7 @@ export function registerQueueCommands(program: Command): void {
       } catch (error) {
         const err = error as Error;
         console.error('Error creating queue:', err.message);
-        process.exit(1);
+        throw err; // Let Commander handle the exit via exitOverride
       }
     });
 
@@ -48,7 +48,7 @@ export function registerQueueCommands(program: Command): void {
       } catch (error) {
         const err = error as Error;
         console.error('Error updating queue:', err.message);
-        process.exit(1);
+        throw err; // Let Commander handle the exit via exitOverride
       }
     });
 
@@ -69,7 +69,7 @@ export function registerQueueCommands(program: Command): void {
               `Warning: Queue '${name}' contains ${stats.total} tasks that will be deleted.`
             );
             console.log('Use --force to skip this confirmation.');
-            process.exit(1);
+            throw new Error('Delete operation cancelled - use --force to override');
           }
         }
 
@@ -78,7 +78,7 @@ export function registerQueueCommands(program: Command): void {
       } catch (error) {
         const err = error as Error;
         console.error('Error deleting queue:', err.message);
-        process.exit(1);
+        throw err; // Let Commander handle the exit via exitOverride
       }
     });
 
@@ -94,7 +94,7 @@ export function registerQueueCommands(program: Command): void {
       } catch (error) {
         const err = error as Error;
         console.error('Error listing queues:', err.message);
-        process.exit(1);
+        throw err; // Let Commander handle the exit via exitOverride
       }
     });
 
@@ -109,7 +109,7 @@ export function registerQueueCommands(program: Command): void {
         const queue = store.getQueue(name);
         if (!queue) {
           console.error(`Queue '${name}' not found.`);
-          process.exit(1);
+          throw new Error(`Queue '${name}' not found.`);
         }
 
         const stats = store.getQueueStats(name);
@@ -120,7 +120,7 @@ export function registerQueueCommands(program: Command): void {
       } catch (error) {
         const err = error as Error;
         console.error('Error inspecting queue:', err.message);
-        process.exit(1);
+        throw err; // Let Commander handle the exit via exitOverride
       }
     });
 }

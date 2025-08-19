@@ -1,4 +1,4 @@
-#!/usr/bin/env -S yarn node
+#!/usr/bin/env node
 
 import { Command } from 'commander';
 import { readFileSync } from 'fs';

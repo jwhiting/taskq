@@ -2,6 +2,12 @@ import path from 'path';
 import os from 'os';
 import fs from 'fs';
 
+// Store original console methods for restoration
+const originalConsoleLog = console.log;
+const originalConsoleError = console.error;
+const originalConsoleWarn = console.warn;
+const originalConsoleInfo = console.info;
+
 export function getTestDatabasePath(): string {
   const testDbPath = path.join(
     os.tmpdir(),
@@ -24,6 +30,24 @@ export function cleanupTestDatabase(dbPath: string): void {
     }
   }
 }
+
+// Global console mocking - suppress console output during tests
+// Individual tests can still capture output using enableOutputCapture()
+beforeEach(() => {
+  // Mock all console methods to suppress output by default
+  console.log = jest.fn();
+  console.error = jest.fn();
+  console.warn = jest.fn();
+  console.info = jest.fn();
+});
+
+afterEach(() => {
+  // Restore original console methods after each test
+  console.log = originalConsoleLog;
+  console.error = originalConsoleError;
+  console.warn = originalConsoleWarn;
+  console.info = originalConsoleInfo;
+});
 
 // Test environment setup
 beforeAll(() => {
