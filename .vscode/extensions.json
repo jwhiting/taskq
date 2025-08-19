@@ -1,0 +1,25 @@
+{
+  "recommendations": [
+    // Dev Containers (essential for this project)
+    "ms-vscode-remote.remote-containers",
+    // Core development extensions
+    "dbaeumer.vscode-eslint",
+    "esbenp.prettier-vscode",
+    "ms-vscode.vscode-typescript-next",
+    // Yarn Berry support
+    "arcanis.vscode-zipfs",
+    // Testing
+    "ms-vscode.test-adapter-converter",
+    "hbenl.vscode-test-explorer",
+    // Git integration
+    "eamodio.gitlens",
+    // Helpful utilities
+    "bradlc.vscode-tailwindcss",
+    "ms-vscode.vscode-json"
+  ],
+  "unwantedRecommendations": [
+    // Avoid conflicts with our setup
+    "ms-vscode.vscode-node-azure-pack",
+    "ms-vscode.azure-account"
+  ]
+}

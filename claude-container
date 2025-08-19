@@ -1,0 +1,226 @@
+#!/bin/bash
+set -euo pipefail
+
+# Claude Container - Convenient wrapper for Dev Container CLI
+# Usage: ./claude-container [command] [options]
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+WORKSPACE_DIR="$PWD"
+
+# Colors for output
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+NC='\033[0m' # No Color
+
+# Print colored output
+print_status() {
+    echo -e "${GREEN}[claude-container]${NC} $1"
+}
+
+print_warning() {
+    echo -e "${YELLOW}[claude-container]${NC} $1"
+}
+
+print_error() {
+    echo -e "${RED}[claude-container]${NC} $1"
+}
+
+# Check if devcontainer CLI is installed
+check_devcontainer_cli() {
+    if ! command -v devcontainer &> /dev/null; then
+        print_error "Dev Container CLI not found!"
+        print_error "Install it with: npm install -g @devcontainers/cli"
+        exit 1
+    fi
+}
+
+# Check if .devcontainer directory exists
+check_devcontainer_config() {
+    if [ ! -d ".devcontainer" ]; then
+        print_error "No .devcontainer directory found in current directory"
+        print_error "Copy the template from templates/project-devcontainer/ to get started"
+        exit 1
+    fi
+}
+
+# Show help
+show_help() {
+    cat << EOF
+Claude Container - Secure containerized Claude Code environment
+
+Usage: $0 [COMMAND] [OPTIONS]
+
+Commands:
+    up          Start the container (default)
+    build       Build the container image
+    rebuild     Rebuild container from scratch (no cache)
+    exec        Execute a command in the running container
+    shell       Open a shell in the running container
+    stop        Stop the running container
+    restart     Restart the container
+    logs        Show container logs
+    status      Show container status
+    help        Show this help message
+
+Options:
+    --rebuild   Force rebuild of container image
+    --remove    Remove existing container before starting
+
+Examples:
+    $0                          # Start container
+    $0 up --rebuild             # Rebuild and start container
+    $0 rebuild                  # Full rebuild from scratch (no cache)
+    $0 shell                    # Open shell in container
+    $0 exec "npm install"       # Run npm install in container
+    $0 stop                     # Stop container
+
+Environment Variables:
+    ALLOWED_DOMAINS   Comma-separated list of allowed domains for firewall
+                     Example: export ALLOWED_DOMAINS="api.example.com,service.foo.com"
+
+EOF
+}
+
+# Main command handling
+COMMAND="${1:-up}"
+shift || true
+
+case "$COMMAND" in
+    "up"|"start")
+        check_devcontainer_cli
+        check_devcontainer_config
+        
+        ARGS=("--workspace-folder" "$WORKSPACE_DIR")
+        
+        # Parse options
+        while [[ $# -gt 0 ]]; do
+            case $1 in
+                --rebuild)
+                    ARGS+=("--remove-existing-container")
+                    shift
+                    ;;
+                --remove)
+                    ARGS+=("--remove-existing-container")
+                    shift
+                    ;;
+                *)
+                    print_error "Unknown option: $1"
+                    exit 1
+                    ;;
+            esac
+        done
+        
+        print_status "Starting Claude Code container..."
+        if [ -n "${ALLOWED_DOMAINS:-}" ]; then
+            print_status "Allowed domains: $ALLOWED_DOMAINS"
+        fi
+        
+        devcontainer up "${ARGS[@]}"
+        print_status "Container started successfully!"
+        print_status "You can now run: $0 shell"
+        ;;
+        
+    "build")
+        check_devcontainer_cli
+        check_devcontainer_config
+        
+        print_status "Building container image..."
+        devcontainer build --workspace-folder "$WORKSPACE_DIR"
+        print_status "Build completed successfully!"
+        ;;
+        
+    "rebuild")
+        check_devcontainer_cli
+        check_devcontainer_config
+        
+        print_status "Rebuilding container from scratch (no cache)..."
+        print_warning "This will remove existing container and rebuild without cache"
+        
+        # Stop and remove existing container
+        $0 stop
+        
+        # Build with no cache and remove existing container
+        devcontainer up --workspace-folder "$WORKSPACE_DIR" --remove-existing-container --build-no-cache
+        
+        print_status "Rebuild completed successfully!"
+        print_status "You can now run: $0 shell"
+        ;;
+        
+    "exec")
+        check_devcontainer_cli
+        
+        if [ $# -eq 0 ]; then
+            print_error "No command specified for exec"
+            exit 1
+        fi
+        
+        EXEC_COMMAND="$1"
+        print_status "Executing: $EXEC_COMMAND"
+        devcontainer exec --workspace-folder "$WORKSPACE_DIR" /bin/bash -c "$EXEC_COMMAND"
+        ;;
+        
+    "shell")
+        check_devcontainer_cli
+        
+        print_status "Opening shell in container..."
+        devcontainer exec --workspace-folder "$WORKSPACE_DIR" /bin/zsh
+        ;;
+        
+    "stop")
+        check_devcontainer_cli
+        
+        print_status "Stopping container..."
+        # Get container ID and stop it
+        CONTAINER_ID=$(docker ps -q -f "label=devcontainer.local_folder=$WORKSPACE_DIR" 2>/dev/null || true)
+        if [ -n "$CONTAINER_ID" ]; then
+            docker stop "$CONTAINER_ID"
+            print_status "Container stopped successfully!"
+        else
+            print_warning "No running container found"
+        fi
+        ;;
+        
+    "restart")
+        check_devcontainer_cli
+        check_devcontainer_config
+        
+        print_status "Restarting container..."
+        $0 stop
+        $0 up
+        ;;
+        
+    "logs")
+        check_devcontainer_cli
+        
+        print_status "Showing container logs..."
+        CONTAINER_ID=$(docker ps -q -f "label=devcontainer.local_folder=$WORKSPACE_DIR" 2>/dev/null || true)
+        if [ -n "$CONTAINER_ID" ]; then
+            docker logs "$CONTAINER_ID"
+        else
+            print_warning "No running container found"
+        fi
+        ;;
+        
+    "status")
+        check_devcontainer_cli
+        
+        print_status "Container status:"
+        CONTAINER_ID=$(docker ps -a -q -f "label=devcontainer.local_folder=$WORKSPACE_DIR" 2>/dev/null || true)
+        if [ -n "$CONTAINER_ID" ]; then
+            docker ps -a --filter "id=$CONTAINER_ID"
+        else
+            print_warning "No container found for this workspace"
+        fi
+        ;;
+        
+    "help"|"--help"|"-h")
+        show_help
+        ;;
+        
+    *)
+        print_error "Unknown command: $COMMAND"
+        print_error "Run '$0 help' for usage information"
+        exit 1
+        ;;
+esac

@@ -1,0 +1,72 @@
+{
+  "name": "Claude Code Sandbox",
+  "build": {
+    "dockerfile": "Dockerfile",
+    "args": {
+      "TZ": "${localEnv:TZ:America/Los_Angeles}"
+    }
+  },
+  "runArgs": [
+    "--cap-add=NET_ADMIN",
+    "--cap-add=NET_RAW"
+  ],
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "dbaeumer.vscode-eslint",
+        "esbenp.prettier-vscode",
+        "eamodio.gitlens",
+        "ms-vscode.vscode-typescript-next",
+        "arcanis.vscode-zipfs",
+        "bradlc.vscode-tailwindcss",
+        "ms-vscode.test-adapter-converter",
+        "hbenl.vscode-test-explorer"
+      ],
+      "settings": {
+        "editor.formatOnSave": true,
+        "editor.defaultFormatter": "esbenp.prettier-vscode",
+        "editor.codeActionsOnSave": {
+          "source.fixAll.eslint": "explicit"
+        },
+        "terminal.integrated.defaultProfile.linux": "zsh",
+        "terminal.integrated.profiles.linux": {
+          "bash": {
+            "path": "bash",
+            "icon": "terminal-bash"
+          },
+          "zsh": {
+            "path": "zsh"
+          }
+        },
+        "typescript.preferences.useAliasesForRenames": false,
+        "typescript.updateImportsOnFileMove.enabled": "always",
+        "typescript.suggest.autoImports": true,
+        "jest.jestCommandLine": "yarn test",
+        "jest.autoRun": "off",
+        "search.exclude": {
+          "**/.yarn": true,
+          "**/.pnp.*": true
+        },
+        "eslint.packageManager": "yarn",
+        "prettier.packageManager": "yarn"
+      }
+    }
+  },
+  "remoteUser": "node",
+  "mounts": [
+    "source=claude-code-bashhistory-${devcontainerId},target=/commandhistory,type=volume",
+    "source=${localWorkspaceFolder}/.devcontainer,target=/workspace/.devcontainer,type=bind,readonly",
+    "source=${localEnv:HOME}/.claude,target=/home/node/.claude,type=bind"
+    // "target=/workspace/.venv,type=volume"
+  ],
+  "remoteEnv": {
+    "NODE_OPTIONS": "--max-old-space-size=4096",
+    "POWERLEVEL9K_DISABLE_GITSTATUS": "true",
+    "CLAUDE_CONFIG_DIR": "/home/node/.claude",
+    "ALLOWED_DOMAINS": "repo.yarnpkg.com"
+    // "PYPROJECT_TOML": "/workspace/pyproject.toml"
+  },
+  "workspaceMount": "source=${localWorkspaceFolder},target=/workspace,type=bind,consistency=delegated",
+  "workspaceFolder": "/workspace",
+  "postCreateCommand": "sudo -E /usr/local/bin/init-firewall.sh && sudo /usr/local/bin/correct-volume-permissions.sh && sudo /usr/local/bin/remove-sudo.sh && /usr/local/bin/setup-python.sh && yarn install && echo 'TaskQ development environment ready!'"
+}
