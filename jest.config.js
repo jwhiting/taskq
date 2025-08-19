@@ -1,5 +1,6 @@
-module.exports = {
-  preset: 'ts-jest',
+export default {
+  preset: 'ts-jest/presets/default-esm',
+  extensionsToTreatAsEsm: ['.ts'],
   testEnvironment: 'node',
   roots: ['<rootDir>/tests'],
   testMatch: ['**/*.test.ts'],
@@ -17,7 +18,11 @@ module.exports = {
   // detectOpenHandles: true, // Show what's keeping Jest alive
   globals: {
     'ts-jest': {
+      useESM: true,
       tsconfig: 'tsconfig.test.json'
     }
-  }
+  },
+  moduleNameMapping: {
+    '^(\\.{1,2}/.*)\\.js$': '$1',
+  },
 };

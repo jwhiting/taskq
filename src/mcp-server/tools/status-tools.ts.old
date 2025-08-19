@@ -1,0 +1,181 @@
+import { Server } from "@modelcontextprotocol/sdk/server/index.js";
+import { z } from "zod";
+import { TaskStore } from "../../core/index.js";
+import { 
+  createTextResponse, 
+  createJsonResponse, 
+  createErrorResponse, 
+  formatTable 
+} from "../utils/responses.js";
+
+/**
+ * Get status tool definitions for tools/list handler
+ */
+export function getStatusToolDefinitions() {
+  return [
+        {
+          name: "get_status",
+          description: "Get system-wide status or queue-specific status",
+          inputSchema: {
+            type: "object",
+            properties: {
+              queue: {
+                type: "string",
+                description: "Optional queue name for queue-specific status"
+              }
+            }
+          }
+        },
+        {
+          name: "update_task_journal",
+          description: "Add a journal entry to track task status changes",
+          inputSchema: {
+            type: "object",
+            properties: {
+              task_id: {
+                type: "number",
+                description: "Task ID to add journal entry for"
+              },
+              status: {
+                type: "string", 
+                description: "Status for this journal entry",
+                enum: ["pending", "checked_out", "completed", "failed"]
+              },
+              notes: {
+                type: "string",
+                description: "Optional notes for this status change"
+              }
+            },
+            required: ["task_id", "status"]
+          }
+        }
+      ];
+}
+
+/**
+ * Register status tool call handlers with the MCP server
+ */
+export function registerStatusTools(server: Server, taskStore: TaskStore) {
+  // Status tool call handler  
+  server.setRequestHandler({ method: "tools/call" }, async (request) => {
+    const { name, arguments: args } = request.params;
+
+    try {
+      switch (name) {
+        case "get_status": {
+          const validated = z.object({
+            queue: z.string().optional()
+          }).parse(args);
+
+          if (validated.queue) {
+            // Queue-specific status
+            const queue = taskStore.getQueue(validated.queue);
+            if (!queue) {
+              throw new Error(`Queue '${validated.queue}' not found`);
+            }
+            const stats = taskStore.getQueueStats(validated.queue);
+            
+            const summary = [
+              `Queue: ${queue.name}`,
+              `Description: ${queue.description || "None"}`,
+              `Total Tasks: ${stats.total}`,
+              `Pending: ${stats.pending}`,
+              `Checked Out: ${stats.checkedOut}`,
+              `Completed: ${stats.completed}`,
+              `Failed: ${stats.failed}`,
+              `Created: ${new Date(queue.createdAt).toLocaleString()}`,
+              `Updated: ${new Date(queue.updatedAt).toLocaleString()}`
+            ].join("\n");
+
+            return createTextResponse(`Queue Status:\n\n${summary}`);
+          } else {
+            // System-wide status
+            const queues = taskStore.listQueues();
+            let totalTasks = 0;
+            let pendingTasks = 0;
+            let checkedOutTasks = 0;
+            let completedTasks = 0;
+            let failedTasks = 0;
+            
+            const queueSummaries = queues.map(queue => {
+              const stats = taskStore.getQueueStats(queue.name);
+              totalTasks += stats.total;
+              pendingTasks += stats.pending;
+              checkedOutTasks += stats.checkedOut;
+              completedTasks += stats.completed;
+              failedTasks += stats.failed;
+              
+              return {
+                name: queue.name,
+                totalTasks: stats.total,
+                pendingTasks: stats.pending,
+                checkedOutTasks: stats.checkedOut,
+                completedTasks: stats.completed,
+                failedTasks: stats.failed
+              };
+            });
+            
+            const summary = [
+              "TaskQ System Status",
+              "===================",
+              "",
+              `Total Queues: ${queues.length}`,
+              `Total Tasks: ${totalTasks}`,
+              `Pending Tasks: ${pendingTasks}`,
+              `Checked Out Tasks: ${checkedOutTasks}`,
+              `Completed Tasks: ${completedTasks}`,
+              `Failed Tasks: ${failedTasks}`,
+              "",
+              "Queue Summary:",
+              ""
+            ];
+
+            if (queueSummaries.length > 0) {
+              const headers = ["Queue", "Total", "Pending", "Checked Out", "Completed", "Failed"];
+              const rows = queueSummaries.map(q => [
+                q.name,
+                q.totalTasks.toString(),
+                q.pendingTasks.toString(),
+                q.checkedOutTasks.toString(),
+                q.completedTasks.toString(),
+                q.failedTasks.toString()
+              ]);
+
+              const table = formatTable(headers, rows);
+              summary.push(table);
+            } else {
+              summary.push("No queues found.");
+            }
+
+            return createTextResponse(summary.join("\n"));
+          }
+        }
+
+        case "update_task_journal": {
+          const validated = z.object({
+            task_id: z.number(),
+            status: z.enum(["pending", "checked_out", "completed", "failed"]),
+            notes: z.string().optional()
+          }).parse(args);
+
+          const journalEntry = taskStore.addJournalEntry({
+            taskId: validated.task_id,
+            status: validated.status,
+            notes: validated.notes
+          });
+          
+          return createJsonResponse({
+            success: true,
+            message: `Journal entry added for task ${validated.task_id}`,
+            journalEntry
+          });
+        }
+
+        default:
+          return null; // Let other handlers process unknown tools
+      }
+    } catch (error) {
+      return createErrorResponse(error as Error);
+    }
+  });
+}

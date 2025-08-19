@@ -3,6 +3,7 @@
   "version": "0.1.0",
   "description": "Multi-interface task queue management system with CLI, MCP server, and web interface",
   "packageManager": "yarn@4.9.2",
+  "type": "module",
   "main": "./dist/core/index.js",
   "types": "./dist/core/index.d.ts",
   "bin": {
@@ -48,8 +49,10 @@
     "LLMs.txt"
   ],
   "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.0.0",
     "better-sqlite3": "^12.2.0",
-    "commander": "^14.0.0"
+    "commander": "^14.0.0",
+    "zod": "^3.22.0"
   },
   "devDependencies": {
     "@types/better-sqlite3": "^7.6.13",
