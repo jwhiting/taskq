@@ -292,6 +292,8 @@ TaskQ follows a **layered modular architecture** with clear separation of concer
 - Configuration resolution (args → env → config → defaults)
 - Thread-safe concurrent operations
 - Input validation and sanitization
+- **Developer-friendly API** for programmatic usage
+- **Agent-friendly interface** for AI-driven task population
 
 #### 2. CLI Interface (`src/cli/`)
 **Purpose**: Command-line interface
@@ -311,6 +313,8 @@ TaskQ follows a **layered modular architecture** with clear separation of concer
 - All core operations exposed as tools
 - Structured JSON responses
 - Error handling with context
+- **Comprehensive tool descriptions** serving as embedded documentation
+- **Rich parameter schemas** with validation and examples
 
 #### 4. Web Interface (`src/web-server/`)
 **Purpose**: HTTP server + web UI
@@ -389,6 +393,8 @@ Package structure requirements:
 ### Distribution
 - **Single npm package** with multiple entry points
 - **Core library** can be imported by other Node.js projects
+- **Developer-friendly API** for programmatic task management
+- **Agent-compatible interface** for AI-driven task population
 - **CLI tool** available via `npx taskq`
 - **MCP server** via `npx taskq-mcp-server`
 - **Web server** via `npx taskq-web`
@@ -555,15 +561,112 @@ Both CLI and MCP interfaces use **partial update semantics**:
 - Real-time WebSocket updates
 - Database schema migrations
 
+## Programmatic Usage Requirements
+
+### Developer-Friendly Core Library
+The core library must be designed for easy programmatic usage:
+
+#### Import Simplicity
+- Clean, intuitive import syntax for Node.js projects
+- Well-documented public API with TypeScript support
+- Minimal setup required for basic operations
+- Sensible defaults for common use cases
+
+#### Agent-Friendly Interface
+- **Simple task creation** methods for AI agents to populate queues
+- **Batch operations** for efficient bulk task creation
+- **Clear error handling** with descriptive messages
+- **Async/await support** for modern JavaScript patterns
+
+#### Use Cases
+- **Developers** can import TaskQ to programmatically manage task queues
+- **AI agents** can be instructed to write scripts that populate tasks
+- **Integration scripts** can bulk-load tasks from external systems
+- **Automation tools** can manage queues as part of larger workflows
+
+#### API Design Principles
+- **Intuitive method names** that clearly express intent
+- **Consistent parameter patterns** across all operations
+- **Flexible input formats** (objects, arrays, individual parameters)
+- **Comprehensive return values** with operation results and metadata
+
 ## Success Criteria
 
 1. **Functionality**: All core operations work across all interfaces
 2. **Reliability**: Zero data corruption under concurrent access
 3. **Performance**: Handles large queues (10k+ tasks) efficiently
-4. **Usability**: Intuitive CLI and web interfaces
-5. **Quality**: >95% test coverage, passes all linting
-6. **Documentation**: Complete API docs and usage examples
-7. **Distribution**: Easy installation via npm/npx
+4. **Usability**: Intuitive CLI, web, and programmatic interfaces
+5. **Developer Experience**: Easy to import and use in custom scripts
+6. **Agent Compatibility**: AI agents can effectively write TaskQ integration code
+7. **Quality**: >95% test coverage, passes all linting
+8. **Documentation**: Complete API docs, README, CLI help, and LLM context
+9. **Distribution**: Easy installation via npm/npx
+
+## Documentation Requirements
+
+### Multi-Format Documentation Strategy
+TaskQ requires comprehensive documentation across multiple formats to serve different user types and contexts:
+
+#### 1. CLI Help System
+**Purpose**: Immediate in-terminal guidance
+**Requirements**:
+- Built-in help for all commands and subcommands
+- Usage examples for common operations
+- Parameter descriptions with valid values
+- Error message suggestions for common mistakes
+- Context-sensitive help based on current command
+
+#### 2. README.md
+**Purpose**: Primary project documentation and onboarding
+**Requirements**:
+- **Quick Start**: Installation and basic usage in under 5 minutes
+- **Complete Feature Overview**: All interfaces (CLI, MCP, Web, programmatic)
+- **Usage Examples**: Real-world scenarios for each interface
+- **Configuration Guide**: All configuration options and precedence
+- **Architecture Overview**: Component relationships and data flow
+- **API Reference**: Core library methods and interfaces
+- **Troubleshooting**: Common issues and solutions
+- **Contributing Guide**: Development setup and guidelines
+
+#### 3. LLMs.txt
+**Purpose**: AI agent context and training material
+**Requirements**:
+- **Comprehensive system overview** for AI understanding
+- **Complete command reference** with syntax and examples
+- **Common usage patterns** for different scenarios
+- **Integration examples** for programmatic usage
+- **Error handling patterns** and troubleshooting
+- **Best practices** for queue management and task organization
+- **Architecture explanation** for AI agents building integrations
+
+#### 4. MCP Tool Documentation
+**Purpose**: Embedded documentation within MCP server tool definitions
+**Requirements**:
+- **Detailed tool descriptions** explaining purpose and behavior
+- **Complete parameter schemas** with types, constraints, and examples
+- **Usage examples** within tool descriptions
+- **Error condition explanations** for each tool
+- **Cross-tool workflow guidance** for complex operations
+- **Best practice recommendations** embedded in tool metadata
+
+### Documentation Standards
+
+#### Content Requirements
+- **Accuracy**: All examples must be tested and working
+- **Completeness**: Cover all features and interfaces
+- **Clarity**: Written for both technical and non-technical users
+- **Consistency**: Uniform terminology and formatting across all docs
+- **Maintainability**: Documentation updates with feature changes
+
+#### Format Requirements
+- **Markdown**: Primary format for README and supplementary docs
+- **Inline Help**: Built into CLI using help frameworks
+- **Structured LLM Context**: Optimized for AI agent consumption
+- **MCP Tool Schemas**: Rich JSON schemas with embedded documentation
+- **Code Examples**: Syntax-highlighted and executable
+- **Cross-References**: Links between related concepts and commands
+
+
 
 ## Acceptance Tests
 
@@ -585,3 +688,11 @@ Both CLI and MCP interfaces use **partial update semantics**:
 - [ ] Code passes linting and formatting checks
 - [ ] Documentation is complete and accurate
 - [ ] Package installs and runs on all target platforms
+
+### Documentation Quality
+- [ ] CLI help commands provide comprehensive guidance
+- [ ] README covers all features with working examples
+- [ ] LLMs.txt enables AI agents to effectively use TaskQ
+- [ ] MCP tool descriptions provide clear usage guidance
+- [ ] All documentation examples are tested and functional
+- [ ] Cross-references between docs are accurate and helpful
