@@ -324,7 +324,7 @@ const response = await sendMcpRequest(client, {
 ### Deliverables ✅
 
 - MCP server with stdio transport and full tool suite
-- All queue and task operations as MCP tools (14 tools total)
+- All queue and task operations as MCP tools (16 tools total)
 - Zod schemas with rich parameter descriptions and validation
 - Structured error handling with meaningful context
 - Comprehensive tool metadata serving as embedded documentation
@@ -397,26 +397,78 @@ const response = await sendMcpRequest(client, {
 
 ### Goals
 
-- Express.js REST API backend
-- All core operations via HTTP endpoints
-- Real-time updates with Server-Sent Events
-- CORS and error handling middleware
+- Complete web interface with server-side rendering
+- Simple, robust architecture without complex client-side frameworks
+- Polling-based updates for real-time feel
+- Form-based interactions with minimal JavaScript
+
+### Technical Architecture
+
+**Server-Side Rendering Approach:**
+- Express.js with Handlebars templating engine
+- Server renders HTML pages with data pre-loaded from TaskStore
+- Traditional form submissions for all data modifications
+- Simple JavaScript polling for live updates (page refreshes)
+- No REST API needed - direct TaskStore integration in route handlers
+
+**Styling Strategy:**
+- Vanilla CSS (no frameworks) for maximum control and minimal dependencies
+- CSS Grid and Flexbox for responsive layout
+- Clean, functional design focused on data readability
+- Simple color scheme prioritizing functionality over aesthetics
+
+**Testing Requirements:**
+- All Cypress E2E tests MUST use `data-testid` attributes for element selection
+- NO text-based selectors to ensure tests remain stable across UI copy changes
+- Test ID format: `data-testid="functional-element-description"`
+- Examples: `data-testid="create-queue-button"`, `data-testid="task-status-pending"`
 
 ### Deliverables
 
-- Express.js server with all API routes
-- Queue endpoints (CRUD operations)
-- Task endpoints (CRUD operations)
-- Status and journal endpoints
-- Server-Sent Events for real-time updates
-- Middleware for CORS, error handling, and logging
+- Express.js server with Handlebars template rendering
+- Server-side route handlers for all operations
+- HTML templates with embedded data and semantic markup
+- Vanilla CSS styling with responsive design
+- Minimal JavaScript for polling updates and form enhancement
+- Comprehensive Cypress E2E tests using data-testid selectors
+
+### HTTP Endpoints
+
+**Page Routes (GET - Server-Rendered HTML):**
+- `GET /` - Dashboard with queue overview
+- `GET /queue/:id` - Queue detail page with tasks
+
+**Form Action Routes (POST - Form Submissions):**
+- `POST /queue/create` - Create new queue
+- `POST /queue/:id/update` - Update queue properties
+- `POST /queue/:id/delete` - Delete queue
+- `POST /task/create` - Create new task
+- `POST /task/:id/update` - Update task properties
+- `POST /task/:id/checkout` - Checkout task for work
+- `POST /task/:id/complete` - Mark task complete
+- `POST /task/:id/reset` - Reset task to pending
+- `POST /task/:id/fail` - Mark task failed
+- `POST /task/:id/delete` - Delete task
 
 ### Key Files
 
-- `src/web-server/index.ts` - Web server entry point
-- `src/web-server/routes/` - API route implementations
-- `src/web-server/middleware/` - Express middleware
-- `tests/web-server/api.test.ts` - API endpoint tests
+- `src/web-server/index.ts` - Web server entry point with Express setup
+- `src/web-server/routes/` - Route handlers:
+  - `pages.ts` - Page rendering routes (dashboard, queue details)
+  - `forms.ts` - Form submission handlers for all operations
+- `src/web-server/templates/` - Handlebars templates:
+  - `layout.hbs` - Base layout template
+  - `dashboard.hbs` - Queue overview page
+  - `queue.hbs` - Queue detail page
+- `src/web-server/public/` - Static assets:
+  - `css/main.css` - Core styles and layout
+  - `css/components.css` - Reusable UI components
+  - `css/responsive.css` - Mobile and tablet breakpoints
+  - `js/polling.js` - Simple polling for live updates
+- `tests/web-server/` - Server tests:
+  - `routes.test.ts` - Route handler integration tests
+  - `rendering.test.ts` - Template rendering tests
+- `cypress/e2e/web-interface.cy.ts` - End-to-end tests with data-testid selectors
 
 ### Builds On
 
@@ -424,68 +476,26 @@ const response = await sendMcpRequest(client, {
 
 ### Enables
 
-- Web frontend development
-- HTTP API usage by external systems
-- Real-time web interface
+- Visual task queue management interface
+- Non-technical user access to TaskQ functionality
+- Browser-based monitoring and administration
 
 ### Completion Criteria
 
-- [ ] All API endpoints work correctly
-- [ ] Server-Sent Events provide real-time updates
-- [ ] CORS configuration allows localhost access
-- [ ] Error handling returns proper HTTP status codes
-- [ ] API tests cover all endpoints
-- [ ] Integration tests use real database
+- [ ] Express server serves all page routes with correct data
+- [ ] All form submissions work correctly and redirect appropriately
+- [ ] Handlebars templates render data cleanly and semantically
+- [ ] CSS provides clean, responsive design across devices
+- [ ] JavaScript polling updates page content without full reload
+- [ ] All HTML elements have appropriate data-testid attributes
+- [ ] Cypress E2E tests cover all user workflows using data-testid selectors
+- [ ] Integration tests use real database (no mocks)
+- [ ] Error handling provides user-friendly feedback
+- [ ] Server starts reliably and handles concurrent requests
 
 ---
 
-## Phase 6: Web Interface Frontend (8-10 hours)
-
-### Goals
-
-- Complete web UI for task queue management
-- Responsive design with modern UX
-- Real-time updates from backend
-- Form validation and error handling
-
-### Deliverables
-
-- HTML/CSS/JavaScript frontend
-- Dashboard with queue overview
-- Queue management (create, edit, delete)
-- Task management (add, edit, checkout, complete)
-- Real-time updates via Server-Sent Events
-- Responsive design for mobile and desktop
-
-### Key Files
-
-- `src/web-server/public/index.html` - Main web page
-- `src/web-server/public/css/` - Stylesheets
-- `src/web-server/public/js/` - JavaScript frontend
-- `cypress/e2e/` - End-to-end tests
-
-### Builds On
-
-- Phase 5: Web backend provides API and real-time updates
-
-### Enables
-
-- Complete web-based task queue management
-- Visual interface for non-technical users
-- Browser-based queue monitoring
-
-### Completion Criteria
-
-- [ ] All web UI functionality works correctly
-- [ ] Real-time updates display properly
-- [ ] Forms validate input and show errors
-- [ ] Responsive design works on mobile and desktop
-- [ ] Cypress E2E tests cover all workflows
-- [ ] Cross-browser compatibility verified
-
----
-
-## Phase 7: Documentation & Polish (6-8 hours)
+## Phase 6: Documentation & Polish (6-8 hours)
 
 ### Goals
 
