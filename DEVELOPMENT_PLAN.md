@@ -393,7 +393,9 @@ const response = await sendMcpRequest(client, {
 
 ---
 
-## Phase 5: Web Interface (8-10 hours)
+## Phase 5: Web Interface (8-10 hours) - POSTPONED
+
+**Status: Postponed** - Focusing on CLI and MCP server polishing first.
 
 ### Goals
 
@@ -499,47 +501,47 @@ const response = await sendMcpRequest(client, {
 
 ### Goals
 
-- Complete all documentation formats
+- Polish self-documenting interfaces (CLI and MCP tools)
+- Rewrite README for clarity and agent comprehension
 - Final testing and bug fixes
 - Package preparation for distribution
 - Performance optimization
 
 ### Deliverables
 
-- Comprehensive README.md
-- LLMs.txt for AI agent context
-- CLI help system completion
-- MCP tool documentation refinement
+- Clear, concise README.md focused on what/when/how
+- Self-documenting CLI with improved help output
+- Self-documenting MCP server with clear tool descriptions
 - Package.json optimization for distribution
 - Performance testing and optimization
 
 ### Key Files
 
-- `README.md` - Primary project documentation
-- `LLMs.txt` - AI agent context file
+- `README.md` - Primary project documentation (what/when/how focus)
+- `src/cli/index.ts` - CLI help system improvements
+- `src/mcp-server/tools/` - MCP tool description enhancements
 - `package.json` - Final package configuration
-- `docs/` - Additional documentation
 
 ### Builds On
 
-- All previous phases: Complete system ready for documentation
+- Phase 1-4: Complete CLI, MCP server, and core functionality
 
 ### Enables
 
+- Clear agent understanding of TaskQ capabilities
+- Intuitive CLI usage without external documentation
+- Self-explanatory MCP tools for AI assistants
 - Public distribution via npm
-- AI agent usage via LLMs.txt
-- Developer onboarding via README
-- Production usage
 
 ### Completion Criteria
 
-- [ ] README covers all features with working examples
-- [ ] LLMs.txt enables effective AI agent usage
-- [ ] CLI help is comprehensive and helpful
-- [ ] MCP tool descriptions are complete
-- [ ] All documentation examples are tested
+- [ ] README clearly explains what TaskQ does, when to use it, and how
+- [ ] CLI help output is comprehensive and guides users effectively
+- [ ] MCP tool descriptions are clear and actionable for AI agents
+- [ ] All examples in documentation are tested and working
 - [ ] Package is ready for npm publication
 - [ ] Performance meets requirements (>10k tasks, <10ms ops)
+- [ ] Self-documenting interfaces require no external documentation
 
 ---
 

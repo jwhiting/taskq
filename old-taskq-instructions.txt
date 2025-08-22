@@ -1,0 +1,145 @@
+
+***OLD INSTRUCTIONS FROM A PRIOR VERSION OF THIS PROJECT***
+***INCLUDED ONLY FOR CONCEPTUAL REFERENCE IN WRITING DOCS***
+
+taskq - Task Queue System for Reliable Batch Processing
+
+USAGE:
+    taskq <command> [args...]
+
+COMMANDS:
+    create <queue> <instructions>   Create a new task queue with instructions
+    add <queue> <task_params_json>  Add a task to a queue as json params for the work
+    checkout <queue>                Get next available task with instructions
+    complete <queue> <task_id>      Mark a checked-out task as completed
+    release <queue> <task_id>       Release a checked-out task back to pending
+    release-all <queue>             Release all checked-out tasks back to pending
+    list <queue>                    Show all tasks in a queue with status
+    status <queue>                  Show progress summary for a queue
+    queues                          List all queues with task counts
+    show-instructions <queue>       Display the instructions for a queue
+    update-instructions <queue> <new_instructions>  Update queue instructions
+    drop <queue>                    Delete a queue and all its tasks
+    drop-all                        Delete all queues and tasks
+    help                            Show this help message
+
+GLOBAL OPTIONS:
+    --dry-run                       Show what would be done without making changes
+    --test-db                       Use test database (~/.taskq-test.db) instead of production
+
+SYSTEM DESIGN:
+    This system is designed for reliable batch processing where multiple
+    parallel workers (including contextless AI sub-agents) can process tasks
+    from a shared queue without missing tasks or duplicating work, which is not
+    possible in a typical agent loop with text-only context or limited internal
+    todo lists that often miss individual tasks over long lists.
+
+    The checkout and completion workflow ensures atomic task assignment and
+    prevents race conditions when multiple workers operate simultaneously as
+    well as provides instructions to the workers on task checkout.
+
+    It is useful for repetetive tasks when more than a handful of instances are
+    needed, for example: migrating a large number of test cases to a new
+    assertion library, or analyzing every file in a folder and adding it to a
+    documentation index.
+
+WORKFLOW:
+    1. Create queue:
+        $ taskq create my-queue "detailed instructions..."
+        see *write effective instructions* below.
+    2. Populate queue:
+        $ python3 -c "..code to iteratively insert tasks..."
+        see *reliable task population* below.
+    3. Workers process items:
+        workers are spawned by user request, e.g. "spawn 10 taskq worker
+        sub-agents", each one doing:
+        $ taskq checkout my-queue  # shows task + instructions
+        ... if "all tasks completed" end now, else ...
+        ... do the work ...
+        $ taskq complete my-queue <task_id>
+    5. Monitor:
+       $ taskq status my-queue
+
+WRITE EFFECTIVE INSTRUCTIONS:
+    Instructions for task queues should be complete and self-contained since
+    workers may have no prior context about the project. Good instructions
+    include:
+
+    - WHAT: Clear description of the task to perform
+    - WHERE: Full paths to input files/directories and output locations
+    - HOW: Specific steps or methodology to follow
+    - FORMAT: Expected output format with examples
+    - CONTEXT: Any background information needed
+    - INSTRUCTING AN ASSISTANT: The agent defaults to thinking it's a generic
+      helpful assistant. Instructions should be written as a user talking to
+      the agent to direct it, see examples.
+
+    Instructions do not need to include directions for the final taskq
+    completion command; that will be explained automatically to the worker on
+    checkout.
+
+    Example for file indexing:
+    "You have been given a file or directory name from /Users/jwhiting/scripts. 
+    If it's a file, read its contents to understand its purpose. If it's a
+    directory, examine key files within it. Then append a properly formatted
+    entry to /Users/jwhiting/scripts/index2.md under an appropriate category
+    section. Use format: '- **filename** — detailed description'. Look at
+    existing entries for formatting examples."
+
+    Example for code migration:
+    "You have been given a test file path and a test case name that uses the
+    old XUnit library. Read the file, identify all assertion calls, convert the
+    test case to Jest syntax according to the mapping in
+    /project/migration-guide.md, and save the updated file. Preserve all test
+    logic and comments."
+
+DEFINE TASK ARGUMENTS AS JSON:
+    Task strings must contain all the key data needed for the specific unique
+    task as JSON, as if a worker is a function that accepts a json object
+    payload for arguments. For example a file-indexing task queue might use
+    tasks named `{"filename":"foo bar.md"}`. Or, if refactoring many test cases
+    one at a time the task could look like `{"filename":"frontend/homepage.ts",
+    "case":"renders logo"}`.
+
+RELIABLE TASK POPULATION:
+    Use inline python scripting to populate all the atomic tasks in a queue.
+    Manual insertion could skip items, and bash looping constructs are
+    surprisingly error-prone when quoting/escaping comes into play (especially
+    considering tasks are JSON), and with the small variations in utility
+    syntax across environments. Here's a good example for robust insertion of
+    all *.widget file paths from a source folder into a widget refactoring
+    queue:
+
+    python3 -c '
+      import os
+      import json
+      import glob
+      import subprocess
+      print(f"\nAdding all widget files to widget refactoring queue...")
+      queue_name="refactor-widget-files"
+      widgets_path = os.path.expanduser("~/widgets")
+      for filepath in glob.glob(os.path.join(widgets_path, "*.widget")):
+          task_json = json.dumps({"filepath": filepath})
+          cmd = ["taskq", "add", queue_name, task_json]
+          result = subprocess.run(cmd, capture_output=True, text=True)
+          if result.returncode == 0:
+              print(f"✓ Added: {os.path.basename(filepath)}")
+          else:
+              print(f"✗ Failed: {os.path.basename(filepath)} - {result.stderr.strip()}")
+      print(f"\nDone! Running status check...")
+      subprocess.run(["taskq", "status", queue_name])
+    '
+
+PARALLEL USAGE:
+    Multiple workers can safely operate on the same queue simultaneously.
+    Each checkout atomically assigns a unique task to prevent conflicts.
+
+HANDLING COMPLETION:
+    When checkout returns exactly "All tasks completed!" the worker should exit
+    normally. This indicates there are no more pending tasks in the queue.
+    
+    For AI sub-agents: If you see "All tasks completed!" from checkout, your
+    work is done. Do NOT attempt further checkouts. Simply report that all
+    tasks are complete and exit.
+
+""")
